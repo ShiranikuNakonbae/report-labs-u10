@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Baseball Scorer &middot; Parser Statistik</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <header class="site-header">
+      <h1>Baseball Scorer <span>Parser Statistik</span></h1>
+      <p class="subtitle">Unggah PDF &ldquo;REPORT PERTANDINGAN&rdquo;, pilih tim, dan dapatkan laporan statistik lengkap.</p>
+    </header>
+
+    <section class="panel" id="upload-panel">
+      <input type="file" id="file-input" accept=".pdf,application/pdf" hidden>
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Unggah PDF">
+        <div class="dropzone-inner">
+          <div class="dropzone-icon" aria-hidden="true">&#8593;</div>
+          <p class="dropzone-title">Tarik &amp; letakkan PDF di sini</p>
+          <p class="dropzone-hint">atau klik untuk memilih file</p>
+        </div>
+      </div>
+      <div class="file-chip" id="file-chip" hidden>
+        <span id="file-name"></span>
+        <button type="button" class="link-btn" id="reset-file">Ganti</button>
+      </div>
+      <p class="error" id="error" hidden></p>
+      <button type="button" class="primary" id="parse-btn">Proses PDF</button>
+    </section>
+
+    <section class="panel" id="team-panel" hidden>
+      <h2>Pilih tim</h2>
+      <p class="subtitle">Ditemukan <span id="team-count"></span> tim dalam PDF.</p>
+      <div class="team-grid" id="team-grid"></div>
+    </section>
+
+    <section class="panel" id="report-panel" hidden>
+      <div class="report-toolbar">
+        <h2>Laporan <span id="report-team"></span></h2>
+        <div class="toolbar-actions">
+          <button type="button" class="secondary" id="open-tab">Buka di tab baru</button>
+          <button type="button" class="primary" id="download-btn">Unduh HTML</button>
+        </div>
+      </div>
+      <iframe id="report-frame" title="Laporan statistik"></iframe>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

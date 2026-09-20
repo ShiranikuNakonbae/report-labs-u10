@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Artifacts
+pdf_text.txt
+server.log
+
+# Example files
+labs_statistik_report.html
+REPORT PERTANDINGAN.pdf
+statistik_labs_u10.ipynb
+
+# OS
+.DS_Store
