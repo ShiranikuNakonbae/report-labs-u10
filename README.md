@@ -33,6 +33,28 @@ Lalu buka http://127.0.0.1:5000 di browser.
 > ke Python sistem mungkin perlu `--break-system-packages`. Virtual environment
 > menghindari hal tersebut.
 
+## Menjalankan dengan Docker
+
+Cara paling mudah untuk memindahkan aplikasi ke mesin lain tanpa mengatur
+Python sama sekali:
+
+```bash
+docker build -t scorer-parser .
+docker run -p 5000:5000 scorer-parser
+```
+
+Lalu buka http://localhost:5000 di browser.
+
+Dengan Docker Compose (opsional):
+
+```bash
+docker compose up --build
+```
+
+Hentikan dengan `Ctrl+C` (docker run) atau `docker compose down` (Compose).
+Port di dalam kontainer adalah 5000; untuk memakai port host yang berbeda,
+ubah sisi kiri pemetaan, mis. `-p 8080:5000`.
+
 ## Alur kerja
 
 1. **Upload PDF** — tarik & letakkan atau klik area upload.

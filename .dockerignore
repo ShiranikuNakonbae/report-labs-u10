@@ -1,0 +1,30 @@
+# Version control
+.git
+.gitignore
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime artifacts
+pdf_text.txt
+server.log
+
+# Example / reference files (not needed inside the image)
+REPORT PERTANDINGAN.pdf
+labs_statistik_report.html
+statistik_labs_u10.ipynb
+
+# Docs & OS metadata
+README.md
+.DS_Store
+
+# Docker files themselves
+Dockerfile
+.dockerignore
+docker-compose.yml
