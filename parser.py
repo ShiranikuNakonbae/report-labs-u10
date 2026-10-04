@@ -387,11 +387,9 @@ def compute_team_report(games, team):
             "player": player,
             "first_game": first["game"],
             "last_game": last["game"],
-            "obp_first": first["obp"],
-            "obp_last": last["obp"],
+            "obp_avg": sum(a["obp"] for a in appearances) / len(appearances),
             "obp_improvement": improvement_percent(first["obp"], last["obp"]),
-            "hit_ratio_first": first["hit_ratio"],
-            "hit_ratio_last": last["hit_ratio"],
+            "hit_ratio_avg": sum(a["hit_ratio"] for a in appearances) / len(appearances),
             "hit_ratio_improvement": improvement_percent(first["hit_ratio"], last["hit_ratio"]),
         })
 

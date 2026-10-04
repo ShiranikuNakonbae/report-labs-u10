@@ -288,8 +288,8 @@ def render_report(report, source_name, generated_at=None):
 
     # --- Improvement table ---
     improvement_headers = [
-        "Pemain", "Game awal", "Game akhir", "OBP awal", "OBP akhir", "Improvement OBP",
-        "Hit ratio awal", "Hit ratio akhir", "Improvement hit ratio",
+        "Pemain", "Game awal", "Game akhir", "Average OBP", "Improvement OBP",
+        "Average hit ratio", "Improvement hit ratio",
     ]
     improvement_header_html = "".join(
         f"<th class='sortable' data-column='{i}' data-type='{'text' if i == 0 else 'number'}'>"
@@ -300,9 +300,9 @@ def render_report(report, source_name, generated_at=None):
         "<tr>"
         f"<td>{escape(row['player'])}</td>"
         f"<td>{row['first_game']}</td><td>{row['last_game']}</td>"
-        f"<td>{_format_percent(row['obp_first'])}</td><td>{_format_percent(row['obp_last'])}</td>"
+        f"<td>{_format_percent(row['obp_avg'])}</td>"
         f"<td class='{'positive' if row['obp_improvement'] is not None and row['obp_improvement'] >= 0 else 'negative'}'>{_format_improvement(row['obp_improvement'])}</td>"
-        f"<td>{_format_percent(row['hit_ratio_first'])}</td><td>{_format_percent(row['hit_ratio_last'])}</td>"
+        f"<td>{_format_percent(row['hit_ratio_avg'])}</td>"
         f"<td class='{'positive' if row['hit_ratio_improvement'] is not None and row['hit_ratio_improvement'] >= 0 else 'negative'}'>{_format_improvement(row['hit_ratio_improvement'])}</td>"
         "</tr>"
         for row in report["improvement_rows"]
@@ -416,7 +416,7 @@ def render_report(report, source_name, generated_at=None):
 <div class='grid'>{bar_charts}</div>
 {slugging_section}
 {obp_section}
-<h2>Improvement OBP dan Hit Ratio</h2><p class='note'>Klik header untuk sorting ascending/descending. Improvement = (nilai akhir - nilai awal) / nilai awal x 100. N/A berarti nilai awal nol.</p>{improvement_table}
+<h2>Improvement OBP dan Hit Ratio</h2><p class='note'>Klik header untuk sorting ascending/descending. Average = rata-rata nilai dari seluruh pertandingan yang diikuti. Improvement = (nilai game akhir - nilai game awal) / nilai game awal x 100. N/A berarti nilai awal nol.</p>{improvement_table}
 {error_section}
 {methodology}
 {_SORTABLE_SCRIPT}
