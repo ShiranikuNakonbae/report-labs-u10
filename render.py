@@ -32,10 +32,15 @@ def _table(headers, rows, keys):
 
 def _player_table(rows):
     keys = [
-        "player", "games", "ab", "runs", "hits", "rbi", "errors",
-        "pa", "avg", "obp_proxy", "hit_score",
+        "player", "games", "pa", "ab", "b1", "doubles", "triples", "hr",
+        "runs", "rbi", "bb", "k", "hbp", "sf", "pitches", "ip", "er",
+        "errors", "avg", "obp_proxy", "hit_score",
     ]
-    headers = ["Pemain", "Game", "AB", "R", "H", "RBI", "E", "PA", "AVG", "OBP proxy", "Hit score"]
+    headers = [
+        "Pemain", "Game", "PA", "AB", "1B", "2B", "3B", "HR",
+        "R", "RBI", "BB", "K", "HBP", "SF", "P", "IP", "ER",
+        "E", "AVG", "OBP proxy", "Hit score",
+    ]
     header_html = "".join(
         f"<th class='sortable' data-column='{i}' data-type='{'text' if i == 0 else 'number'}'>"
         f"{escape(h)}<span class='sort-indicator'>↕</span></th>"

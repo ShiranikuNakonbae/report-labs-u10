@@ -116,12 +116,9 @@ def _play_by_play_section(block):
 
 
 def parse_play_by_play(block, player_names):
-    """Compute per-player pa, on_base, hit_score sum and total_bases."""
+    """Compute per-player counters from the play-by-play section."""
     names_sorted = sorted(player_names, key=len, reverse=True)
-    pa = Counter()
-    on_base = Counter()
-    hit_score = Counter()
-    total_bases = Counter()
+    stats = defaultdict(Counter)
 
     for line in _play_by_play_section(block):
         player = next(
@@ -132,7 +129,23 @@ def parse_play_by_play(block, player_names):
             continue
 
         lowered = line.lower()
-        pa[player] += 1
+        s = stats[player]
+        s["pa"] += 1
+
+        if "home run" in lowered:
+            s["hr"] += 1
+        elif "tripled" in lowered:
+            s["triples"] += 1
+        elif "doubled" in lowered:
+            s["doubles"] += 1
+        if "walked" in lowered:
+            s["bb"] += 1
+        if "struck out" in lowered:
+            s["k"] += 1
+        if "hit by pitch" in lowered:
+            s["hbp"] += 1
+        if "sacrifice" in lowered:
+            s["sf"] += 1
 
         reached = (
             "home run" in lowered
@@ -145,30 +158,55 @@ def parse_play_by_play(block, player_names):
             or "walked" in lowered
         )
         if reached:
-            on_base[player] += 1
+            s["on_base"] += 1
 
         if "home run" in lowered:
-            hit_score[player] += 100
-            total_bases[player] += 4
+            s["hit_score"] += 100
+            s["total_bases"] += 4
         elif "tripled" in lowered:
-            hit_score[player] += 90
-            total_bases[player] += 3
+            s["hit_score"] += 90
+            s["total_bases"] += 3
         elif "doubled" in lowered:
-            hit_score[player] += 80
-            total_bases[player] += 2
+            s["hit_score"] += 80
+            s["total_bases"] += 2
         elif "singled" in lowered:
-            hit_score[player] += 70
-            total_bases[player] += 1
+            s["hit_score"] += 70
+            s["total_bases"] += 1
         elif "hit by pitch" in lowered:
-            hit_score[player] += 70
+            s["hit_score"] += 70
         elif "reached on" in lowered:
-            hit_score[player] += 50
+            s["hit_score"] += 50
         elif "struck out" in lowered:
-            hit_score[player] += 40
+            s["hit_score"] += 40
         else:
-            hit_score[player] += 50
+            s["hit_score"] += 50
 
-    return pa, on_base, hit_score, total_bases
+    return stats
+
+
+def parse_pitching(block):
+    """Return {pitcher: {"ip": float, "er": int}} from the 'IP H R ER BB SO' block."""
+    stats = {}
+    lines = block.splitlines()
+    start = next(
+        (i for i, ln in enumerate(lines) if "IP H R ER BB SO" in ln), None
+    )
+    if start is None:
+        return stats
+    for line in lines[start + 1:]:
+        if line.strip().startswith("T:"):
+            break
+        tokens = line.split()
+        # Team-switch header lines ("RED FOX   ") have no numeric tail.
+        if len(tokens) < 7:
+            continue
+        tail = tokens[-6:]
+        if not all(t.replace(".", "", 1).isdigit() for t in tail):
+            continue
+        name = " ".join(tokens[:-6])
+        if name:
+            stats[name] = {"ip": float(tail[0]), "er": int(tail[3])}
+    return stats
 
 
 def parse_game(block, game_num):
@@ -243,12 +281,26 @@ def parse_game(block, game_num):
 
     # Play-by-play derived stats.
     all_names = {p["player"] for p in players}
-    pa, on_base, hit_score, total_bases = parse_play_by_play(block, all_names)
+    pbp = parse_play_by_play(block, all_names)
+    pitching = parse_pitching(block)
     for p in players:
-        p["pa"] = pa[p["player"]]
-        p["on_base"] = on_base[p["player"]]
-        p["hit_score"] = hit_score[p["player"]]
-        p["total_bases"] = total_bases[p["player"]]
+        s = pbp[p["player"]]
+        p["pa"] = s["pa"]
+        p["on_base"] = s["on_base"]
+        p["hit_score"] = s["hit_score"]
+        p["total_bases"] = s["total_bases"]
+        p["doubles"] = s["doubles"]
+        p["triples"] = s["triples"]
+        p["hr"] = s["hr"]
+        p["b1"] = max(p["hits"] - p["doubles"] - p["triples"] - p["hr"], 0)
+        p["bb"] = s["bb"]
+        p["k"] = s["k"]
+        p["hbp"] = s["hbp"]
+        p["sf"] = s["sf"]
+        pit = pitching.get(p["player"], {})
+        p["pitches"] = 0  # pitch counts are not present in the PDF
+        p["ip"] = pit.get("ip", 0)
+        p["er"] = pit.get("er", 0)
 
     return {
         "game": game_num,
@@ -336,7 +388,8 @@ def compute_team_report(games, team):
         for p in team_players:
             total = player_totals[p["player"]]
             for field in ("ab", "runs", "hits", "rbi", "errors", "pa", "on_base",
-                          "hit_score", "total_bases"):
+                          "hit_score", "total_bases", "doubles", "triples", "hr", "b1",
+                          "bb", "k", "hbp", "sf", "pitches", "ip", "er"):
                 total[field] += p[field]
             player_game_rows.append({
                 "game": g["game"],
@@ -365,6 +418,17 @@ def compute_team_report(games, team):
             "avg": round(total["hits"] / ab, 3) if ab else 0,
             "obp_proxy": round(total["on_base"] / pa, 3) if pa else 0,
             "hit_score": round(total["hit_score"] / pa, 1) if pa else 0,
+            "b1": total["b1"],
+            "doubles": total["doubles"],
+            "triples": total["triples"],
+            "hr": total["hr"],
+            "bb": total["bb"],
+            "k": total["k"],
+            "hbp": total["hbp"],
+            "sf": total["sf"],
+            "pitches": total["pitches"],
+            "ip": round(total["ip"], 2),
+            "er": total["er"],
             "total_bases": total["total_bases"],
             "slugging_average": round(total["total_bases"] / ab, 3) if ab else 0,
         })

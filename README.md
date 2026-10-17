@@ -66,7 +66,8 @@ ubah sisi kiri pemetaan, mis. `-p 8080:5000`.
 
 - KPI: jumlah game, rekor (W-L), total run, total hit, jumlah pemain.
 - Ringkasan pertandingan.
-- Profil pemain (tabel sortable: Game, AB, R, H, RBI, E, PA, AVG, OBP proxy, Hit score).
+- Profil pemain (tabel sortable: PA, AB, 1B, 2B, 3B, HR, R, RBI, BB, K, HBP, SF,
+  P, IP, ER, E, AVG, OBP proxy, Hit score; data yang tidak ada di PDF = 0).
 - Bar chart: Top OBP, Top hit score, Top hit.
 - Grafik Slugging Average (per pemain & total).
 - Grafik Trend OBP per pertandingan (SVG per pemain).
